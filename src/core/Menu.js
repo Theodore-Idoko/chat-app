@@ -1,12 +1,10 @@
 import { Link, withRouter } from 'react-router-dom';
-import {signout, isAuthenticated} from '../auth'
+import { signout, isAuthenticated } from '../auth';
 
 const isActive = (history, path) => {
   if (history.location.pathname === path) return { color: '#ff9900' };
   else return { color: '#ffffff' };
 };
-
-
 
 const Menu = ({ history }) => (
   <div>
@@ -54,8 +52,12 @@ const Menu = ({ history }) => (
             </Link>
           </li>
           <li className='nav-item'>
-            <Link className='nav-link' to='/'>
-              {isAuthenticated().user.name}
+            <Link
+              className='nav-link'
+              style={isActive(history, `/user/${isAuthenticated().user._id}`)}
+              to={`/user/${isAuthenticated().user._id}`}
+            >
+              {`${isAuthenticated().user.name}'s profile`}
             </Link>
           </li>
         </>
