@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {signup } from '../auth'
+import { Link } from 'react-router-dom';
+import { signup } from '../auth';
 
 class Signup extends Component {
   constructor() {
@@ -35,51 +36,52 @@ class Signup extends Component {
           name: '',
           email: '',
           password: '',
-          open: true
+          open: true,
         });
     });
   };
 
-  
   signupForm = (name, email, password, error, open) => (
     <form>
-          <div className='form-group'>
-            <label className='text-muted'>Name</label>
-            <input
-              onChange={this.handleChange('name')}
-              type='text'
-              className='form-control'
-              value={name}
-            />
-          </div>
-          <div className='form-group'>
-            <label className='text-muted'>Email</label>
-            <input
-              onChange={this.handleChange('email')}
-              type='email'
-              className='form-control'
-              value={email}
-            />
-          </div>
-          <div className='form-group'>
-            <label className='text-muted'>Password</label>
-            <input
-              onChange={this.handleChange('password')}
-              type='password'
-              className='form-control'
-              value={password}
-            />
-          </div>
-          {error && <div className='alert alert-danger'>{error}</div>}
-          {open && <div className='alert alert-info'>Account is successfully created. Please Sign in</div>}
-          <button
-            onClick={this.clickSubmit}
-            className='btn btn-raised btn-primary'
-          >
-            Submit
-          </button>
-        </form>
-  )
+      <div className='form-group'>
+        <label className='text-muted'>Name</label>
+        <input
+          onChange={this.handleChange('name')}
+          type='text'
+          className='form-control'
+          value={name}
+        />
+      </div>
+      <div className='form-group'>
+        <label className='text-muted'>Email</label>
+        <input
+          onChange={this.handleChange('email')}
+          type='email'
+          className='form-control'
+          value={email}
+        />
+      </div>
+      <div className='form-group'>
+        <label className='text-muted'>Password</label>
+        <input
+          onChange={this.handleChange('password')}
+          type='password'
+          className='form-control'
+          value={password}
+        />
+      </div>
+      {error && <div className='alert alert-danger'>{error}</div>}
+      {open && (
+        <div className='alert alert-info'>
+          Account is successfully created. Please 
+          <Link to='/signin'>Sign in</Link>
+        </div>
+      )}
+      <button onClick={this.clickSubmit} className='btn btn-raised btn-primary'>
+        Submit
+      </button>
+    </form>
+  );
 
   render() {
     const { name, email, password, error, open } = this.state;
