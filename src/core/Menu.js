@@ -43,6 +43,25 @@ const Menu = ({ history }) => (
       )}
       {isAuthenticated() && (
         <>
+          
+          <li className='nav-item'>
+            <Link
+              className='nav-link'
+              style={isActive(history, `/findpeople`)}
+              to={`/findpeople`}
+            >
+              Find People
+            </Link>
+          </li>
+          <li className='nav-item'>
+            <Link
+              className='nav-link'
+              style={isActive(history, `/user/${isAuthenticated().user._id}`)}
+              to={`/user/${isAuthenticated().user._id}`}
+            >
+              {`${isAuthenticated().user.name}'s profile`}
+            </Link>
+          </li>
           <li className='nav-item'>
             <Link
               className='nav-link'
@@ -54,15 +73,6 @@ const Menu = ({ history }) => (
               onClick={() => signout(() => history.push('/'))}
             >
               Sign out
-            </Link>
-          </li>
-          <li className='nav-item'>
-            <Link
-              className='nav-link'
-              style={isActive(history, `/user/${isAuthenticated().user._id}`)}
-              to={`/user/${isAuthenticated().user._id}`}
-            >
-              {`${isAuthenticated().user.name}'s profile`}
             </Link>
           </li>
         </>
