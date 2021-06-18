@@ -8,11 +8,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import FollowProfileButton from './FollowProfileButton';
 import ProfileTabs from './ProfileTabs';
+import {listByUser} from '../post/apiPost'
 
 const Profile = () => {
   const [user, setUser] = useState({ following: [], followers: [] });
 
   const [redirectToSignin, setredirectToSignin] = useState(false);
+  const [posts, setPosts] = useState([])
 
   const [following, setFollowing] = useState(false);
   const [error, setError] = useState('');
@@ -55,11 +57,23 @@ const Profile = () => {
 
           setFollowing(tofollowing);
           setUser(data);
+          loadPosts(data._id)
         }
       });
     },
     [userId]
   );
+
+  const loadPosts = userId => {
+    const token = isAuthenticated().token;
+    listByUser(userId, token).then(data => {
+      if(data.error){
+        console.log(data.error)
+      } else {
+        setPosts(data)
+      }
+    })
+  }
 
   useEffect(() => {
     init(userId);
@@ -82,7 +96,7 @@ const Profile = () => {
     <div className='container'>
       <h2 className='mt-5 mb-5'>Profile</h2>
       <div className='row'>
-        <div className='col-md-6'>
+        <div className='col-md-4'>
           <img
             style={{ height: '200px', width: 'auto' }}
             className='img-thumbnail'
@@ -91,7 +105,7 @@ const Profile = () => {
             alt={user.name}
           />
         </div>
-        <div className='col-md-6'>
+        <div className='col-md-8'>
           <div className='lead mt-2'>
             <p>Hello, {user.name}</p>
             <p>Email: {user.email}</p>
@@ -99,6 +113,12 @@ const Profile = () => {
           </div>
           {isAuthenticated().user && isAuthenticated().user._id === user._id ? (
             <div className='d-inline-block '>
+                <Link
+                className='btn btn-raised btn-info mr-5'
+                to={`/create/post`}
+              >
+                Create Post
+              </Link>
               <Link
                 className='btn btn-raised btn-success mr-5'
                 to={`/user/edit/${user._id}`}
@@ -120,7 +140,7 @@ const Profile = () => {
           <hr />
           <p className='lead'>{user.about}</p>
           <hr />
-          <ProfileTabs followers={user.followers} following={user.following} />
+          <ProfileTabs followers={user.followers} following={user.following} posts={posts}/>
         </div>
       </div>
     </div>
