@@ -1,14 +1,23 @@
 import React, { Component } from 'react';
-import { singlePost, remove } from './apiPost';
+import { singlePost, remove, like, unlike } from './apiPost';
 import { Link } from 'react-router-dom';
 import DefaultPost from '../images/mountains.jpg';
 import { Redirect } from 'react-router';
-import {isAuthenticated} from '../auth'
+import { isAuthenticated } from '../auth';
 
 class SinglePost extends Component {
   state = {
     post: '',
-    redirect: false,
+    redirectToHome: false,
+    redirectToSignin: false,
+    like: false,
+    likes: 0,
+  };
+
+  checkLike = (likes) => {
+    const userId = isAuthenticated() && isAuthenticated().user._id;
+    let match = likes.indexOf(userId) !== -1;
+    return match;
   };
 
   componentDidMount = () => {
@@ -17,8 +26,35 @@ class SinglePost extends Component {
       if (data.error) {
         console.log(data.error);
       } else {
-        
-        this.setState({ post: data });
+        this.setState({
+          post: data,
+          likes: data.likes.length,
+          like: this.checkLike(data.likes),
+        });
+      }
+    });
+  };
+
+  likeToggle = () => {
+    if (!isAuthenticated()) {
+      this.setState({
+        redirectToSignin: true,
+      });
+      return false;
+    }
+    let callApi = this.state.like ? unlike : like;
+    const userId = isAuthenticated().user._id;
+    const postId = this.state.post._id;
+    const token = isAuthenticated().token;
+
+    callApi(userId, token, postId).then((data) => {
+      if (data.error) {
+        console.log(data.error);
+      } else {
+        this.setState({
+          like: !this.state.like,
+          likes: data.likes.length,
+        });
       }
     });
   };
@@ -30,8 +66,7 @@ class SinglePost extends Component {
       if (data.error) {
         console.log(data.error);
       } else {
-        
-        this.setState({ redirect: true });
+        this.setState({ redirectToHome: true });
       }
     });
   };
@@ -43,11 +78,10 @@ class SinglePost extends Component {
   };
 
   renderPost = (post) => {
-    if(this.state.redirect){
-      return <Redirect to='/' />
-    }
     const posterId = post.postedBy ? `/user/${post.postedBy._id}` : '';
     const posterName = post.postedBy ? post.postedBy.name : 'unknown';
+
+    const { like, likes } = this.state;
 
     return (
       <div className='card-body'>
@@ -60,7 +94,25 @@ class SinglePost extends Component {
           onError={(i) => (i.target.src = `${DefaultPost}`)}
           alt={post.name}
         />
-
+        {like ? (
+          <h4 onClick={this.likeToggle}>
+            {' '}
+            <i
+              className='fa fa-thumbs-up text-success bg-dark'
+              style={{ padding: '10px', borderRadius: '50%' }}
+            />{' '}
+            {likes} Like
+          </h4>
+        ) : (
+          <h4 onClick={this.likeToggle}>
+            {' '}
+            <i
+              className='fa fa-thumbs-up text-warning bg-dark'
+              style={{ padding: '10px', borderRadius: '50%' }}
+            />{' '}
+            {likes} Like
+          </h4>
+        )}
         <p className='card-text'>{post.body}</p>
         <br />
         <p className='font-italic mark'>
@@ -74,10 +126,16 @@ class SinglePost extends Component {
           {isAuthenticated().user &&
             isAuthenticated().user._id === post.postedBy._id && (
               <>
-                <Link className='btn btn-raised btn-warning mr-5' to={`/post/edit/${post._id}`}>
+                <Link
+                  className='btn btn-raised btn-warning mr-5'
+                  to={`/post/edit/${post._id}`}
+                >
                   Update Post
                 </Link>
-                <button className='btn btn-raised btn-danger '  onClick={this.deleteConfirmed}>
+                <button
+                  className='btn btn-raised btn-danger '
+                  onClick={this.deleteConfirmed}
+                >
                   Delete Post
                 </button>{' '}
               </>
@@ -88,7 +146,12 @@ class SinglePost extends Component {
   };
 
   render() {
-    const { post } = this.state;
+    const { post, redirectToHome, redirectToSignin } = this.state;
+    if (redirectToHome) {
+      return <Redirect to='/' />;
+    } else if (redirectToSignin) {
+      return <Redirect to={`/signin`} />;
+    }
     return (
       <div className='container'>
         <h2 className='card-title display-2 mt-3 mb-2'>{post.title}</h2>
